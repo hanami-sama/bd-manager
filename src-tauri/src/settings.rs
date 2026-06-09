@@ -1,3 +1,4 @@
+use crate::error::BDMResult;
 use crate::storage::Storage;
 use crate::APP_DATA_DIR;
 use serde::{Deserialize, Serialize};
@@ -28,7 +29,7 @@ impl Storage for ManagerSettings {
 }
 
 impl ManagerSettings {
-    pub fn setup_with_app(&mut self, app: &AppHandle) -> Result<(), tauri::Error> {
+    pub fn setup_with_app(&mut self, app: &AppHandle) -> BDMResult<()> {
         if self.download_dir.as_os_str().is_empty()
             || fs::create_dir_all(&self.download_dir).is_err()
         {
@@ -41,19 +42,16 @@ impl ManagerSettings {
 }
 
 #[tauri::command]
-pub fn retrieve_manager_settings(app: AppHandle) -> Result<ManagerSettings, String> {
+pub fn retrieve_manager_settings(app: AppHandle) -> BDMResult<ManagerSettings> {
     let binding = app.state::<Mutex<ManagerSettings>>();
-    let state = binding.lock().map_err(|e| e.to_string())?;
+    let state = binding.lock()?;
     Ok(state.clone())
 }
 
 #[tauri::command]
-pub fn update_manager_settings(
-    app: AppHandle,
-    payload: PartialUpdateSettings,
-) -> Result<(), String> {
+pub fn update_manager_settings(app: AppHandle, payload: PartialUpdateSettings) -> BDMResult<()> {
     let binding = app.state::<Mutex<ManagerSettings>>();
-    let mut state = binding.lock().map_err(|e| e.to_string())?;
+    let mut state = binding.lock()?;
 
     if let Some(access_token) = payload.access_token {
         state.access_token = access_token
@@ -63,6 +61,6 @@ pub fn update_manager_settings(
         state.download_dir = download_dir
     }
 
-    state.save().map_err(|e| e.to_string())?;
+    state.save()?;
     Ok(())
 }
