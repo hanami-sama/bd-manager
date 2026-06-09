@@ -1,0 +1,28 @@
+use serde::de::DeserializeOwned;
+use serde::Serialize;
+use std::fs;
+
+pub trait Storage {
+    fn file_path() -> std::path::PathBuf;
+
+    fn load() -> Result<Self, std::io::Error>
+    where
+        Self: Sized + DeserializeOwned,
+    {
+        let json_string = fs::read_to_string(Self::file_path())?;
+        let value = serde_json::from_str(&json_string)?;
+        Ok(value)
+    }
+
+    fn save(&self) -> Result<(), std::io::Error>
+    where
+        Self: Serialize,
+    {
+        if let Some(parent) = Self::file_path().parent() {
+            fs::create_dir_all(parent)?;
+        }
+        let json_string = serde_json::to_string_pretty(self)?;
+        fs::write(Self::file_path(), json_string)?;
+        Ok(())
+    }
+}
