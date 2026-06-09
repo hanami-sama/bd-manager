@@ -16,8 +16,7 @@ static APP_DATA_DIR: OnceLock<PathBuf> = OnceLock::new();
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            settings::retrieve_manager_settings,
-            settings::update_manager_settings
+            settings::retrieve_manager_settings
         ])
         .setup(|app| {
             APP_DATA_DIR

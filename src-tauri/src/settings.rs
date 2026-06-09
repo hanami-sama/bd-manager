@@ -10,12 +10,6 @@ use tauri::{AppHandle, Manager};
 
 pub const SETTINGS_FILE_NAME: &str = "settings.json";
 
-#[derive(Deserialize)]
-pub struct PartialUpdateSettings {
-    pub access_token: Option<String>,
-    pub download_dir: Option<PathBuf>,
-}
-
 #[derive(Clone, Default, Deserialize, Serialize)]
 pub struct ManagerSettings {
     pub access_token: String,
@@ -46,21 +40,4 @@ pub fn retrieve_manager_settings(app: AppHandle) -> BDMResult<ManagerSettings> {
     let binding = app.state::<Mutex<ManagerSettings>>();
     let state = binding.lock()?;
     Ok(state.clone())
-}
-
-#[tauri::command]
-pub fn update_manager_settings(app: AppHandle, payload: PartialUpdateSettings) -> BDMResult<()> {
-    let binding = app.state::<Mutex<ManagerSettings>>();
-    let mut state = binding.lock()?;
-
-    if let Some(access_token) = payload.access_token {
-        state.access_token = access_token
-    }
-
-    if let Some(download_dir) = payload.download_dir {
-        state.download_dir = download_dir
-    }
-
-    state.save()?;
-    Ok(())
 }
