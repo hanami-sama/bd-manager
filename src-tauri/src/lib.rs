@@ -6,7 +6,7 @@ mod storage;
 use crate::settings::ManagerSettings;
 use crate::storage::Storage;
 use std::path::PathBuf;
-use std::sync::OnceLock;
+use std::sync::{Mutex, OnceLock};
 use tauri::path::BaseDirectory;
 use tauri::Manager;
 
@@ -27,6 +27,7 @@ pub fn run() {
             let mut app_settings: ManagerSettings = ManagerSettings::load().unwrap_or_default();
             app_settings.setup_with_app(app.handle()).unwrap();
             app_settings.save().unwrap();
+            app.manage(Mutex::new(app_settings));
 
             Ok(())
         })
