@@ -1,3 +1,4 @@
+mod account;
 mod error;
 mod http;
 mod settings;
@@ -16,6 +17,11 @@ static APP_DATA_DIR: OnceLock<PathBuf> = OnceLock::new();
 pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
+            account::check_login,
+            account::generate_qrcode,
+            account::login,
+            account::logout,
+            account::poll_qrcode,
             settings::retrieve_manager_settings
         ])
         .setup(|app| {
